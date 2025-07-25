@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Encomendas</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f7f7f7; }
+    h1 { text-align: center; }
+    form, .filtros { margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    .acoes button { margin-right: 5px; }
+    .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-enviar { background: #28a745; color: white; }
+    .btn-concluir { background: #007bff; color: white; }
+    .btn-editar { background: #ffc107; color: black; }
+    .btn-excluir { background: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Painel de Encomendas</h1>
+
+  <form id="formEncomenda">
+    <label>Cliente:</label>
+    <input type="text" name="cliente" required>
+
+    <label>Produto:</label>
+    <input type="text" name="produto" required>
+
+    <label>Quantidade:</label>
+    <input type="number" name="quantidade" required>
+
+    <label>Data de Entrega:</label>
+    <input type="date" name="data_entrega" required>
+
+    <label>Observações:</label>
+    <textarea name="observacoes"></textarea>
+
+    <button type="submit" class="btn btn-enviar">Registrar Encomenda</button>
+  </form>
+
+  <input type="text" id="filtro" placeholder="Buscar encomendas...">
+
+  <table id="tabelaEncomendas">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Produto</th>
+        <th>Qtd</th>
+        <th>Entrega</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/SEU_SCRIPT_ID/exec';
+
+    document.getElementById('formEncomenda').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      data.append("acao", "adicionar");
+
+      await fetch(scriptURL, { method: 'POST', body: data });
+      e.target.reset();
+      carregarEncomendas();
+    });
+
+    async function carregarEncomendas() {
+      const res = await fetch(scriptURL + '?acao=ler');
+      const dados = await res.json();
+      const tbody = document.querySelector('#tabelaEncomendas tbody');
+      tbody.innerHTML = '';
+
+      dados.forEach((linha, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${linha.cliente}</td>
+          <td>${linha.produto}</td>
+          <td>${linha.quantidade}</td>
+          <td>${linha.data_entrega}</td>
+          <td>${linha.status}</td>
+          <td class="acoes">
+            <button class="btn btn-concluir" onclick="atualizarStatus(${index}, 'Concluído')">✔</button>
+            <button class="btn btn-editar" onclick="editarEncomenda(${index})">✎</button>
+            <button class="btn btn-excluir" onclick="excluirEncomenda(${index})">🗑</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function atualizarStatus(index, status) {
+      const data = new FormData();
+      data.append("acao", "status");
+      data.append("index", index);
+      data.append("status", status);
+      await fetch(scriptURL, { method: 'POST', body: data });
+      carregarEncomendas();
+    }
+
+    async function excluirEncomenda(index) {
+      const data = new FormData();
+      data.append("acao", "excluir");
+      data.append("index", index);
+      await fetch(scriptURL, { method: 'POST', body: data });
+      carregarEncomendas();
+    }
+
+    function editarEncomenda(index) {
+      // (Opcional: implementar edição completa)
+      alert("Para editar, exclua e refaça com os dados atualizados.");
+    }
+
+    document.getElementById('filtro').addEventListener('input', function () {
+      const termo = this.value.toLowerCase();
+      document.querySelectorAll('#tabelaEncomendas tbody tr').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(termo) ? '' : 'none';
+      });
+    });
+
+    carregarEncomendas();
+  </script>
+</body>
+</html>
