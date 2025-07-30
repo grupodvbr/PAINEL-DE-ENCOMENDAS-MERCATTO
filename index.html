@@ -45,7 +45,7 @@
   </form>
 
   <div class="encomendas">
-    <h3>📅 Calendário de Entregas</h3>
+    <h3>🗓️ Calendário de Entregas</h3>
     <div id="calendario"></div>
   </div>
 
@@ -67,7 +67,7 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzTUJhfTqIh_iuuueWGUDzfnF6Cj6B7s6S8TIIe7UypibqqyfUkN2--c1FkCg6Hgs41/exec';
+    const scriptURL = 'SUA_URL_DO_SCRIPT';
 
     function abrirModal() {
       document.getElementById('modalCliente').style.display = 'flex';
@@ -97,6 +97,7 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       formData.append("tipo", "cliente");
+      const nomeCliente = formData.get("nome");
 
       await fetch(scriptURL, {
         method: 'POST',
@@ -106,7 +107,13 @@
       alert("Cliente cadastrado!");
       e.target.reset();
       fecharModal();
-      carregarClientes();
+
+      const select = document.getElementById("clienteSelect");
+      const option = document.createElement("option");
+      option.value = nomeCliente;
+      option.textContent = nomeCliente;
+      option.selected = true;
+      select.appendChild(option);
     });
 
     async function carregarClientes() {
