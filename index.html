@@ -2,26 +2,33 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Sistema de Encomendas</title>
+  <title>Painel de Encomendas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
-    h2 { text-align: center; }
-    form, .encomendas, .clientes { background: #fff; padding: 20px; margin: 20px auto; border-radius: 10px; max-width: 600px; box-shadow: 0 0 10px #ccc; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    h2, h3 { text-align: center; }
+    form, .encomendas { background: #fff; padding: 20px; margin: 20px auto; border-radius: 10px; max-width: 700px; box-shadow: 0 0 10px #ccc; }
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, button { width: 100%; padding: 8px; margin-top: 5px; }
-    .lista-encomendas { margin-top: 20px; }
-    .item-encomenda { padding: 10px; border-bottom: 1px solid #ccc; }
-    .status-select { margin-top: 5px; }
+    .cliente-container { display: flex; gap: 10px; align-items: center; }
+    .cliente-container select { flex: 1; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 100%; }
+    #calendario { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
   </style>
 </head>
 <body>
-  <h2>📦 Registro de Encomendas</h2>
+  <h2>📦 Painel de Encomendas</h2>
 
   <form id="form-encomenda">
     <label>Nome do Cliente</label>
-    <input type="text" name="cliente" required>
-    
+    <div class="cliente-container">
+      <select name="cliente" id="clienteSelect" required></select>
+      <button type="button" onclick="abrirModal()">+</button>
+    </div>
+
     <label>Produto</label>
     <input type="text" name="produto" required>
 
@@ -31,29 +38,45 @@
     <label>Valor</label>
     <input type="number" step="0.01" name="valor" required>
 
+    <label>Valor de Adiantamento</label>
+    <input type="number" step="0.01" name="adiantamento" required>
+
     <button type="submit">Registrar Encomenda</button>
   </form>
 
-  <form id="form-cliente">
-    <h3>Cadastro de Cliente</h3>
-    <label>Nome</label>
-    <input type="text" name="nome" required>
-    <label>Telefone</label>
-    <input type="text" name="telefone" required>
-    <label>Endereço</label>
-    <input type="text" name="endereco">
-    <button type="submit">Cadastrar Cliente</button>
-  </form>
-
   <div class="encomendas">
-    <h3>📋 Encomendas Registradas</h3>
-    <div id="listaEncomendas" class="lista-encomendas"></div>
+    <h3>📅 Calendário de Entregas</h3>
+    <div id="calendario"></div>
+  </div>
+
+  <!-- MODAL DE CADASTRO DE CLIENTE -->
+  <div class="modal" id="modalCliente">
+    <div class="modal-content">
+      <h3>Cadastrar Cliente</h3>
+      <form id="form-cliente">
+        <label>Nome</label>
+        <input type="text" name="nome" required>
+        <label>Telefone</label>
+        <input type="text" name="telefone" required>
+        <label>Endereço</label>
+        <input type="text" name="endereco">
+        <button type="submit">Cadastrar</button>
+        <button type="button" onclick="fecharModal()">Fechar</button>
+      </form>
+    </div>
   </div>
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw6TJuQbpbRSrMvP4ozIjgccRA6u1F_cRTcatykPH5Z0o3LTddAepE_NmrVmhiK4BpD/exec';
 
-    // Enviar encomenda
+    function abrirModal() {
+      document.getElementById('modalCliente').style.display = 'flex';
+    }
+
+    function fecharModal() {
+      document.getElementById('modalCliente').style.display = 'none';
+    }
+
     document.getElementById('form-encomenda').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -66,10 +89,10 @@
 
       alert("Encomenda registrada!");
       e.target.reset();
-      carregarEncomendas();
+      carregarClientes();
+      montarCalendario();
     });
 
-    // Enviar cliente
     document.getElementById('form-cliente').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -82,48 +105,73 @@
 
       alert("Cliente cadastrado!");
       e.target.reset();
+      fecharModal();
+      carregarClientes();
     });
 
-    async function carregarEncomendas() {
-      const res = await fetch(scriptURL + '?tipo=listaEncomendas');
-      const dados = await res.json();
-      const container = document.getElementById('listaEncomendas');
-      container.innerHTML = '';
-
-      dados.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'item-encomenda';
-        div.innerHTML = `
-          <strong>${item.cliente}</strong><br>
-          Produto: ${item.produto}<br>
-          Entrega: ${item.dataEntrega}<br>
-          Valor: R$ ${item.valor}<br>
-          Status: 
-          <select class="status-select" data-index="${index}">
-            <option ${item.status === 'AGENDADA' ? 'selected' : ''}>AGENDADA</option>
-            <option ${item.status === 'ENTREGUE' ? 'selected' : ''}>ENTREGUE</option>
-            <option ${item.status === 'CANCELADA' ? 'selected' : ''}>CANCELADA</option>
-          </select>
-        `;
-        container.appendChild(div);
-      });
-
-      document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', async function() {
-          const index = this.dataset.index;
-          const novoStatus = this.value;
-
-          await fetch(scriptURL, {
-            method: 'POST',
-            body: new URLSearchParams({ tipo: 'atualizarStatus', index, status: novoStatus })
-          });
-
-          alert("Status atualizado.");
-        });
+    async function carregarClientes() {
+      const res = await fetch(scriptURL + '?tipo=listaClientes');
+      const lista = await res.json();
+      const select = document.getElementById('clienteSelect');
+      select.innerHTML = '<option value="">Selecione um cliente</option>';
+      lista.forEach(cliente => {
+        const option = document.createElement('option');
+        option.value = cliente.nome;
+        option.textContent = cliente.nome;
+        select.appendChild(option);
       });
     }
 
-    carregarEncomendas();
+    async function montarCalendario() {
+      const res = await fetch(scriptURL + '?tipo=listaEncomendas');
+      const dados = await res.json();
+      const eventos = dados.map((item, index) => ({
+        title: `${item.cliente} - ${item.produto}`,
+        start: item.dataEntrega,
+        extendedProps: {
+          index,
+          cliente: item.cliente,
+          valor: item.valor,
+          status: item.status,
+          adiantamento: item.adiantamento,
+          valorFinal: item.valorFinal
+        }
+      }));
+
+      const calendarEl = document.getElementById('calendario');
+      calendarEl.innerHTML = '';
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,listWeek'
+        },
+        events: eventos,
+        eventClick: async function(info) {
+          const props = info.event.extendedProps;
+          const valorFinal = prompt(`Marcar como ENTREGUE para ${props.cliente}\nAdiantamento: R$ ${props.adiantamento}\nValor Estimado: R$ ${props.valor}\n\nInforme o valor final:`);
+
+          if (valorFinal) {
+            await fetch(scriptURL, {
+              method: 'POST',
+              body: new URLSearchParams({
+                tipo: 'marcarEntregue',
+                index: props.index,
+                valorFinal
+              })
+            });
+            alert("Status atualizado!");
+            montarCalendario();
+          }
+        }
+      });
+      calendar.render();
+    }
+
+    carregarClientes();
+    montarCalendario();
   </script>
 </body>
 </html>
