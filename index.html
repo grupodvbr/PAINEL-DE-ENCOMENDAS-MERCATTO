@@ -36,8 +36,21 @@
     }
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, button { width: 100%; padding: 8px; margin-top: 5px; }
-    .cliente-container { display: flex; gap: 10px; align-items: center; }
-    .cliente-container input[type="text"] { flex: 1; }
+    .cliente-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .cliente-container input[type="text"] {
+      flex: 1;
+    }
+    .cliente-container button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 20px;
+      text-align: center;
+    }
     .modal {
       display: none;
       position: fixed;
@@ -116,7 +129,7 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzm3XmpgUHRMS5x4Az7K4LpfF7GC4SnpZdhJnG7dX8Lk5qn61QzX6hDTbpQvSq5MxGF/exec';
+    const scriptURL = 'SUA_URL_DO_SCRIPT';
 
     function abrirModal() {
       document.getElementById('modalCliente').style.display = 'flex';
