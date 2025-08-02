@@ -20,7 +20,7 @@
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, textarea, button { width: 100%; padding: 8px; margin-top: 5px; }
     textarea { resize: vertical; }
-    .cliente-container { display: flex; gap: 10px; align-items: center; position: relative; }
+    .cliente-container { display: flex; gap: 10px; align-items: center; }
     .cliente-container select { flex: 1; }
     .cliente-container button { width: 40px; height: 40px; padding: 0; font-size: 20px; text-align: center; }
     .modal {
@@ -163,7 +163,6 @@
 
       clientesCadastrados = lista.map(c => c.nome);
 
-      // Ativa busca com select2
       $('#clienteSelect').select2({
         placeholder: "Selecione ou procure um cliente",
         width: '100%'
