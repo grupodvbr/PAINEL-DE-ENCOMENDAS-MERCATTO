@@ -136,8 +136,8 @@
       document.getElementById("clienteSelect").appendChild(option);
       document.getElementById("clienteSelect").value = nomeCliente;
       clientesCadastrados.push(nomeCliente);
+      $('#clienteSelect').select2(); // atualiza Select2
       atualizarFiltros();
-      $('#clienteSelect').select2(); // atualiza select2
     });
 
     async function carregarClientes() {
@@ -163,9 +163,14 @@
 
       clientesCadastrados = lista.map(c => c.nome);
 
+      if ($(selectCliente).hasClass("select2-hidden-accessible")) {
+        $(selectCliente).select2('destroy');
+      }
+
       $('#clienteSelect').select2({
-        placeholder: "Selecione ou procure um cliente",
-        width: '100%'
+        placeholder: "Selecione ou pesquise um cliente",
+        width: '100%',
+        allowClear: true
       });
     }
 
