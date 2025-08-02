@@ -18,9 +18,19 @@
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select, textarea, button { width: 100%; padding: 8px; margin-top: 5px; }
     textarea { resize: vertical; }
-    .cliente-container { display: flex; gap: 10px; align-items: center; }
-    .cliente-container input[type="text"] { flex: 1; }
+    .cliente-container { display: flex; gap: 10px; align-items: center; position: relative; }
+    .cliente-container input[type="text"],
+    .cliente-container input[list="clientes"] { flex: 1; padding-left: 30px !important; }
     .cliente-container button { width: 40px; height: 40px; padding: 0; font-size: 20px; text-align: center; }
+    .icone-lupa {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #888;
+      pointer-events: none;
+    }
     .modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5); justify-content: center; align-items: center;
@@ -41,6 +51,7 @@
   <form id="form-encomenda">
     <label>Pesquisar Cliente</label>
     <div class="cliente-container">
+      <span class="icone-lupa">&#128269;</span>
       <input list="clientes" id="clienteSelect" name="cliente" required />
       <datalist id="clientes"></datalist>
       <button type="button" onclick="abrirModal()">+</button>
@@ -89,7 +100,6 @@
         <input type="text" name="endereco">
         <button type="submit">Cadastrar</button>
         <button type="button" onclick="fecharModal()">Fechar</button>
-      </form>
     </div>
   </div>
 
