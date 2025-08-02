@@ -149,28 +149,31 @@
       selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
       selectFiltro.innerHTML = '<option value="">Todos os Clientes</option>';
 
-      lista.forEach(cliente => {
+      const nomesUnicos = [...new Set(lista.map(c => c.nome))];
+
+      nomesUnicos.forEach(nome => {
         const option1 = document.createElement('option');
-        option1.value = cliente.nome;
-        option1.textContent = cliente.nome;
+        option1.value = nome;
+        option1.textContent = nome;
         selectCliente.appendChild(option1);
 
         const option2 = document.createElement('option');
-        option2.value = cliente.nome;
-        option2.textContent = cliente.nome;
+        option2.value = nome;
+        option2.textContent = nome;
         selectFiltro.appendChild(option2);
       });
 
-      clientesCadastrados = lista.map(c => c.nome);
+      clientesCadastrados = nomesUnicos;
 
       if ($(selectCliente).hasClass("select2-hidden-accessible")) {
         $(selectCliente).select2('destroy');
       }
 
       $('#clienteSelect').select2({
-        placeholder: "Selecione ou pesquise um cliente",
+        placeholder: "Pesquise ou selecione um cliente",
         width: '100%',
-        allowClear: true
+        allowClear: true,
+        minimumResultsForSearch: 0
       });
     }
 
