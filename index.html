@@ -78,7 +78,6 @@
 
   <div id="calendario"></div>
 
-  <!-- MODAL DE CADASTRO DE CLIENTE -->
   <div class="modal" id="modalCliente">
     <div class="modal-content">
       <h3>Cadastrar Cliente</h3>
@@ -131,13 +130,12 @@
       alert("Cliente cadastrado!");
       e.target.reset(); fecharModal();
       const option = document.createElement("option");
-      option.value = nomeCliente;
-      option.textContent = nomeCliente;
+      option.value = nomeCliente.trim().toUpperCase();
+      option.textContent = nomeCliente.trim().toUpperCase();
       document.getElementById("clienteSelect").appendChild(option);
-      document.getElementById("clienteSelect").value = nomeCliente;
-      clientesCadastrados.push(nomeCliente);
-      $('#clienteSelect').select2(); // atualiza Select2
-      atualizarFiltros();
+      document.getElementById("clienteSelect").value = nomeCliente.trim().toUpperCase();
+      clientesCadastrados.push(nomeCliente.trim().toUpperCase());
+      $('#clienteSelect').select2();
     });
 
     async function carregarClientes() {
@@ -149,7 +147,9 @@
       selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
       selectFiltro.innerHTML = '<option value="">Todos os Clientes</option>';
 
-      const nomesUnicos = [...new Set(lista.map(c => c.nome))];
+      const nomesUnicos = [
+        ...new Set(lista.map(c => (c.nome || '').trim().toUpperCase()))
+      ];
 
       nomesUnicos.forEach(nome => {
         const option1 = document.createElement('option');
